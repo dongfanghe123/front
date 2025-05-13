@@ -65,10 +65,8 @@
         {{ tab.label }}
       </div>
 
-      <div class="history-search">
-        <input type="text" placeholder="搜索你的历史记录" />
-        <i class="icon-search"></i>
-      </div>
+
+      <el-input class="search-input" v-model="searchInput" placeholder="搜索你的历史记录"  :suffix-icon="Search"/>
     </div>
   </div>
 
@@ -86,7 +84,7 @@ import 'element-plus/es/components/button/style/css';
 import 'element-plus/es/components/form/style/css';
 import 'element-plus/es/components/form-item/style/css';
 import 'element-plus/es/components/input/style/css';
-
+import { Search } from '@element-plus/icons-vue'
 
 import { useUserStore } from '@/stores/user'
 import axios from '@/utils/axiosInstance'
@@ -99,6 +97,8 @@ import WatchLater from './WatchLater.vue'
 
 
 const showEdit = ref(false)
+const searchInput=ref('')
+
 
 
 const userStore = useUserStore()
@@ -193,6 +193,7 @@ function handleAvatarSuccess(response, file) {
   if (response && response.code === 200) {
     // 假设后端返回的头像地址在 response.data.url
     user.value.avatar = response.data;
+      localStorage.setItem('userAvatar', user.value.avatar)
     ElMessage({
       message: '头像上传成功',
       type: 'success',
@@ -205,9 +206,10 @@ function handleAvatarSuccess(response, file) {
 // 提交用户信息
 const uploadUserInfo = async () => {
   try {
-    const response = await axios.post('/api/user/update', {
+    const response = await axios.post('http://localhost:8888/api/user/update', {
+      userId: userStore.userId,
       avatar: user.value.avatar,
-      username: user.value.username,
+      nickname: user.value.username,
       signature: user.value.signature
     })
 
@@ -245,7 +247,9 @@ onMounted(async () => {
 </script>
 
 
-<style>
+<style scoped>
+
+
 .header-background {
   width: auto;
   height: 190px;
@@ -385,38 +389,10 @@ onMounted(async () => {
 }
 
 
-.history-search {
-  display: flex;
-  align-items: center;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-left: 770px;
+.search-input {
   width: 240px;
-  height: auto;
-  background-color: #fff;
-  transition: border-color 0.2s;
-  text-align: right;
+  height: 30px;
+  margin-left: 840px;
 }
 
-.history-search:focus-within {
-  border-color: #409EFF;
-  /* 聚焦时边框变蓝 */
-}
-
-.history-search input {
-  border: none;
-  outline: none;
-  flex: 1;
-  height: 28px;
-  font-size: 16px;
-  color: #333;
-  background-color: transparent;
-}
-
-.icon-search {
-  font-size: 18px;
-  color: #888;
-  margin-left: 8px;
-  cursor: pointer;
-}
 </style>
