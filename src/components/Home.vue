@@ -29,6 +29,8 @@
           </a>
         </nav>
 
+
+
         <div class="search-area">
           <input type="text" placeholder="搜索" class="search-input">
           <button class="search-btn">
@@ -40,13 +42,12 @@
         </div>
 
         <div class="user-area">
-          <!-- 登录状态显示头像 -->
+
           <div v-if="userStore.isLoggedIn" class="user-avatar" @click="goToProfile">
             <img :src="userStore.userAvatar" style="width: 42px;">
-            <!-- 可以在这里添加用户菜单 -->
+
           </div>
 
-          <!-- 未登录状态显示登录按钮 -->
           <button v-else class="login-btn" ref="loginBtn" @click="showLoginPopup">
             登录
           </button>
@@ -58,11 +59,9 @@
         </div>
 
         <div class="logout" @click="logout" v-if="userStore.isLoggedIn">
-          <img src="@/assets/退出登录.png" class="logout-icon"/>
+          <img src="@/assets/退出登录.png" class="logout-icon" />
           <span class="logout-text">退出登录</span>
         </div>
-
-
       </div>
     </header>
   </div>
@@ -86,16 +85,11 @@
 
   <!-- 主要内容区域 -->
   <main class="main-content">
-    <!-- 视频卡片列表 -->
     <div class="video-list">
-      <VideoCard v-for="video in videos" :id="video.videoId":key="video.videoId" :cover="video.videoCover"
-        :views="formatNumber(video.viewCount)" :likes="formatNumber(video.commentCount)" 
-        :duration="formatDuration(video.videoDuration)"
-        :title="video.title"
-        :author="video.author"
-        :upload-time="formatDate(video.publishDate)"
-        @click="goToDetail(video.videoId)"
-        />
+      <VideoCard v-for="video in videos" :id="video.videoId" :key="video.videoId" :cover="video.videoCover"
+        :views="formatNumber(video.viewCount)" :likes="formatNumber(video.commentCount)"
+        :duration="formatDuration(video.videoDuration)" :title="video.title" :author="video.author"
+        :upload-time="formatDate(video.publishDate)" @click="goToDetail(video.videoId)" />
     </div>
   </main>
 
@@ -104,9 +98,9 @@
 
 <script lang="ts" setup>
 import VideoCard from '@/components/VideoCard.vue'
-import { onMounted, ref, onBeforeUnmount, onUnmounted } from 'vue'
+import { onMounted, ref, onBeforeUnmount, onUnmounted, watch } from 'vue'
 import LoginPopup from '@/components/LoginPopup.vue'
-import { useRouter, onBeforeRouteLeave } from 'vue-router'
+import { useRouter, onBeforeRouteLeave, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import axios from '@/utils/axiosInstance'
 import { nextTick } from 'vue'
@@ -141,7 +135,7 @@ const phone = ref('');
 const code = ref('');
 
 const router = useRouter()
-
+const route = useRoute()
 
 let page = ref(1)
 const pageSize = 8
@@ -155,7 +149,7 @@ function goToDetail(id: number) {
 }
 
 
-function goToProfile(){
+function goToProfile() {
   router.push('/profile')
 }
 
@@ -207,35 +201,29 @@ async function checkNeedLoadMore() {
   }
 }
 
-// onBeforeRouteLeave((to, from, next) => {
-//   sessionStorage.setItem('scrollTop', String(window.scrollY))
-//   next()
-// })
 
-// 封装滚动恢复函数
-// function restoreScrollPosition() {
-//   const savedScrollTop = sessionStorage.getItem('scrollTop')
-//   if (savedScrollTop) {
-//     window.scrollTo({
-//       top: Number(savedScrollTop),
-//       behavior: 'auto'
-//     })
-//   }
-// }
-
-
-onMounted(async() => {
+onMounted(async () => {
   console.log("组件被创建")
   userStore.restore() // 尝试从 localStorage 恢复状态
   await fetchVideos();
-  await checkNeedLoadMore(); 
+  await checkNeedLoadMore();
   // restoreScrollPosition() // ✅ 恢复滚动位置
   window.addEventListener('scroll', handleScroll); // 注册滚动监听
 })
 
 
-onUnmounted(()=>{
-  console.log("组件被销毁")
+watch(
+  () => route.path,
+  (newPath, oldPath) => {
+    if (oldPath === '/profile') {
+      userStore.userAvatar = localStorage.getItem('userAvatar')
+    }
+  }
+)
+
+
+onUnmounted(() => {
+
 })
 
 function handleScroll() {
@@ -243,7 +231,7 @@ function handleScroll() {
   const visibleHeight = window.innerHeight; // 视口高度
   const pageHeight = document.documentElement.scrollHeight; // 页面总高度
 
-    if (scrollY + visibleHeight >= pageHeight - 100 && !loading.value && !finished.value) {
+  if (scrollY + visibleHeight >= pageHeight - 100 && !loading.value && !finished.value) {
     fetchVideos();
   }
 }
@@ -266,8 +254,8 @@ function closeLoginPopup() {
 }
 
 
-function handleLoginSuccess({ avatar, redirectPath,userId }) {
-  userStore.login(avatar,userId)
+function handleLoginSuccess({ avatar, redirectPath, userId }) {
+  userStore.login(avatar, userId)
   router.push({ path: redirectPath })
 }
 
@@ -288,7 +276,7 @@ function toUpload() {
 
 async function logout() {
 
-  const response=await axios.post('http://localhost:8888/api/user/logout')
+  const response = await axios.post('http://localhost:8888/api/user/logout')
   userStore.logout()
 }
 
@@ -318,7 +306,7 @@ function formatNumber(num: number): string {
 
 </script>
 
-<style>
+<style scoped>
 /* 全局样式 */
 * {
   margin: 0;
@@ -329,11 +317,14 @@ function formatNumber(num: number): string {
 
 body {
   background-color: #f4f4f4;
+  /* margin: 0;
+  padding: 0; */
 }
 
 .bilibili-home {
   max-width: 100%;
   overflow-x: visible;
+
 }
 
 /* 顶部导航栏样式 */
@@ -368,6 +359,8 @@ body {
   display: flex;
   flex-grow: 1;
 }
+
+
 
 .nav-item {
   padding: 0 12px;
@@ -413,7 +406,6 @@ body {
 
 .search-area {
   display: flex;
-  margin: 0 20px;
 }
 
 .search-input {
@@ -531,8 +523,6 @@ body {
 }
 
 
-
-
 /* 二级导航样式 */
 .sub-nav {
   background-color: white;
@@ -540,6 +530,7 @@ body {
   position: sticky;
   top: 56px;
   z-index: 90;
+
 }
 
 .sub-nav-container {
@@ -576,7 +567,7 @@ body {
   max-width: 1400px;
   margin: 0 auto;
   padding: 20px 24px;
-  min-height: 100% 
+  min-height: 100%;
 }
 
 .video-list {

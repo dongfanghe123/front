@@ -14,7 +14,6 @@
 import { onMounted, ref } from 'vue'
 import axios from '@/utils/axiosInstance'
 import { useUserStore } from '@/stores/user'
-import { hi, pa } from 'element-plus/es/locale'
 import HistoryCard from './HistoryCard.vue'
 import { useRouter } from 'vue-router'
 import { RefSymbol } from '@vue/reactivity'

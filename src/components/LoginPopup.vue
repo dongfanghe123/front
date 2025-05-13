@@ -104,7 +104,7 @@ import 'element-plus/dist/index.css'
 import { useRouter } from 'vue-router'
 
 
-import { DefineProps } from 'vue'
+
 const props = defineProps(['redirectPath'])
 
 
