@@ -77,18 +77,11 @@
 
 <script lang="ts" setup>
 import { onMounted, ref, computed } from 'vue'
-import { ElMessage, ElDialog, ElButton, ElForm, ElFormItem, ElInput, ElUpload } from 'element-plus';
-import 'element-plus/es/components/message/style/css';
-import 'element-plus/es/components/dialog/style/css';
-import 'element-plus/es/components/button/style/css';
-import 'element-plus/es/components/form/style/css';
-import 'element-plus/es/components/form-item/style/css';
-import 'element-plus/es/components/input/style/css';
+import { ElMessage } from 'element-plus';
 import { Search } from '@element-plus/icons-vue'
 
 import { useUserStore } from '@/stores/user'
 import axios from '@/utils/axiosInstance'
-import 'element-plus/dist/index.css'
 import History from '@/components/History.vue'
 import Offline from './Offline.vue'
 import Favorites from './Favorites.vue'

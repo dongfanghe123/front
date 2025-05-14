@@ -1,43 +1,44 @@
 <template>
+
+    <MainLayout></MainLayout>
+
+
     <div class="video-detail-container">
-        <!-- 视频播放器区域 -->
-        <div class="video-player-section">
-            <div class="video-player-wrapper">
-                <!-- 使用DPlayer作为视频播放器 -->
-                <div id="dplayer" ref="dplayerRef"></div>
+
+        <!--视频详情页左侧区域-->
+        <div class="video-detail-left">
+            <!-- 视频简介 -->
+            <div class="video-info">
+                <!--视频标题-->
+                <h1 class="video-title">{{ videoInfo.title }}</h1>
+                <div class="publish-info">
+                    <span>发布时间: {{ formatDate(videoInfo.publishTime) }}</span>
+                    <span>播放量: {{ formatNumber(videoInfo.viewCount) }}</span>
+                    <span>评论数：{{ formatNumber(videoInfo.commentCount) }}</span>
+                </div>
             </div>
 
-            <!-- 视频标题和操作区 -->
-            <div class="video-info-header">
-                <h1 class="video-title">{{ videoInfo.title }}</h1>
 
-
-                <div class="action-btn">
-                    <img class="player-num"  src="@/assets/播放数.png">
-                    <span>{{ videoInfo.viewCount }}</span>
+            <!--视频播放区域-->
+            <div class="video-player-section">
+                <div class="video-player-wrapper">
+                    <!-- 使用DPlayer作为视频播放器 -->
+                    <div id="dplayer" ref="dplayerRef"></div>
                 </div>
 
-
                 <div class="video-actions">
-
-                    <button class="action-btn" 
-                    :class="{
-                        'liked-in':isLike,
-                        'not-liked-in':!isLike
-                    }"
-                    @click="handleLike">
-                        <img class='like-btn' 
-                        src="@/assets/点赞.png">
+                    <button class="action-btn" :class="{
+                        'liked-in': isLike,
+                        'not-liked-in': !isLike
+                    }" @click="handleLike">
+                        <img class='like-btn' src="@/assets/点赞.png">
                         <span>{{ formatNumber(videoInfo.likeCount) }}</span>
                     </button>
 
-                    <button class="action-btn"
-                    
-                    :class="{
-                        'collect-in':isCollect,
-                        'not-collect-in':!isCollect
-                    }"
-                    @click="handleCollect">
+                    <button class="action-btn" :class="{
+                        'collect-in': isCollect,
+                        'not-collect-in': !isCollect
+                    }" @click="handleCollect">
                         <img class='collect-btn' src="@/assets/收藏.png">
                         <span>{{ formatNumber(videoInfo.collectCount) }}</span>
                     </button>
@@ -46,128 +47,77 @@
                         <img class='share-btn' src="@/assets/分享.png">
                         <span>分享</span>
                     </button>
-
-
                 </div>
-
-
             </div>
+
+
+            <!--视频标签展示区-->
+            <div class="video-tags-container">
+                <div class="video-tags">
+                    <span v-for="(tag, index) in videoInfo.tags" :key="index" class="video-tag"
+                        :class="{ active: activeTag === index }" @click="activeTag = index">
+                        {{ tag }}
+                    </span>
+                </div>
+            </div>
+
+
+            <!--视频评论区-->
+            <Comment v-if="videoInfo?.id" :videoId="videoInfo.id"></Comment>
+
         </div>
 
-        <!-- 视频信息区域 -->
-        <div class="video-content-section">
-            <div class="video-main-content">
-                <!-- UP主信息 -->
-                <div class="up-info">
-                    <div class="up-avatar">
-                        <img :src="upInfo.avatar" alt="UP主头像">
-                    </div>
-                    <div class="up-detail">
-                        <div class="up-name">{{ upInfo.name }}</div>
-                        <div class="up-fans">粉丝: {{ formatNumber(upInfo.fans) }}</div>
-                    </div>
 
+        <div class="video-detail-right">
+            <!-- UP主信息 -->
+            <div class="up-info">
+
+                <div class="up-info-left">
+                    <img class="up-avatar" :src="upInfo.avatar" alt="UP主头像">
+                </div>
+
+                <div class="up-info-right">
+
+                    <div class="nameAndSend">
+                        <div class="up-name">{{ upInfo.name }}</div>
+                        <el-button type="link">
+                            <el-icon>
+                                <Message />
+                            </el-icon>
+                            <span style="margin-left: 6px;">发送消息</span>
+                        </el-button>
+                    </div>
 
                     <button :class="{
                         'followed-in': upInfo.isFollowed,
                         'not-followed-in': !upInfo.isFollowed
-                    }"
-                      class="follow-btn"
-                       @click="handleFollow">
+                    }" class="follow-btn" @click="handleFollow">
                         {{ upInfo.isFollowed ? '已关注' : '+ 关注' }}
                     </button>
-
-
-
-                </div>
-
-                <!-- 视频简介 -->
-                <div class="video-description">
-                    <div class="publish-info">
-                        <span>发布时间: {{ formatDate(videoInfo.publishTime) }}</span>
-                        <span>播放量: {{ formatNumber(videoInfo.viewCount) }}</span>
-                    </div>
-                    <div class="description-text">
-                        {{ videoInfo.description }}
-                    </div>
-                </div>
-
-                <!-- 评论区 -->
-                <div class="comment-section">
-
-                    <h3 class="comment-title">
-                        评论 <span class="comment-count">{{ videoInfo.commentCount }}</span>
-                    </h3>
-
-                    <div class="comment-input-area">
-
-                        <div class="user-avatar">
-                            <img :src="userStore.userAvatar || defaultAvatar" alt="用户头像">
-                        </div>
-
-                        <div class="input-wrapper">
-                            <input type="text" v-model="commentContent" placeholder="发个友善的评论吧~"
-                                @keyup.enter="submitComment">
-                            <button class="submit-btn" @click="submitComment">发布</button>
-                        </div>
-
-                    </div>
-
-                    <div class="comment-list" ref="commentListRef">
-                        <div class="comment-item" v-for="comment in comments" :key="comment.id">
-                            <div class="comment-avatar">
-                                <img :src="comment.userAvatar" alt="用户头像">
-                            </div>
-                            <div class="comment-content">
-                                <div class="comment-user">{{ comment.userName }}</div>
-                                <div class="comment-text">{{ comment.content }}</div>
-                                <div class="comment-meta">
-                                    <span>{{ formatDate(comment.time) }}</span>
-                                    <span class="like-count">
-                                        <i class="iconfont icon-dianzan"></i>
-                                        {{ comment.likeCount }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
 
-            <!-- 右侧推荐视频列表 -->
-            <div class="recommend-section">
-                <h3 class="recommend-title">相关推荐</h3>
-                <div class="recommend-list">
-                    <div class="recommend-item" v-for="video in recommendVideos" :key="video.id"
-                        @click="goToDetail(video.id)">
-                        <div class="recommend-cover">
-                            <img :src="video.cover" alt="视频封面">
-                            <div class="video-duration">{{ formatDuration(video.duration) }}</div>
-                        </div>
-                        <div class="recommend-info">
-                            <div class="recommend-title">{{ video.title }}</div>
-                            <div class="recommend-up">{{ video.upName }}</div>
-                            <div class="recommend-stats">
-                                <span>{{ formatNumber(video.viewCount) }}观看</span>
-                                <span>{{ formatNumber(video.danmakuCount) }}弹幕</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+            <!--推荐视频列表-->
+            
         </div>
+
+
     </div>
 </template>
 
 <script lang="ts" setup>
+
+
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import DPlayer from 'dplayer'
 import { useUserStore } from '@/stores/user'
 import axios from '@/utils/axiosInstance'
-import { ca } from 'element-plus/es/locale'
+import MainLayout from './MainLayout.vue'
+import Comment from './Comment.vue'
 import { ElMessage } from 'element-plus'
+
 
 
 const route = useRoute()
@@ -181,13 +131,13 @@ const videoId = ref(Number(route.params.id));
 const defaultAvatar = ref('src/assets/default.png')
 
 // 视频播放器实例
-const dplayerRef = ref<DPlayer | null>(null)
+const dplayerRef = ref<InstanceType<typeof DPlayer> | null>(null)
 
 //是否点赞
-const isLike=ref<boolean | null>(null)
+const isLike = ref<boolean | null>(null)
 
 //是否收藏
-const isCollect=ref<boolean | null>(null)
+const isCollect = ref<boolean | null>(null)
 
 
 // 视频信息
@@ -203,6 +153,7 @@ const videoInfo = ref({
     publishTime: '',
     description: '',
     upId: 0,
+    tags: []
 })
 
 
@@ -216,105 +167,9 @@ const upInfo = ref({
 })
 
 
-interface CommentInfo {
-    id: number
-    userId: number
-    userName: string
-    userAvatar: string
-    content: string
-    time: string
-    likeCount: number
-}
-
-// 评论相关
-const commentContent = ref('')   //当前登录用户在评论框输入的内容
-const comments = ref<CommentInfo[]>([])  //评论列表
-const commentPage = ref(1)  //当前页码
-const commentPageSize = ref(10)  //分页大小
-const commentLoading = ref(false)  //是否正在加载中
-const commentFinished = ref(false) //是否已经加载完全部评论
-const commentListRef = ref<HTMLElement | null>(null)
-
-// 获取评论
-async function fetchComments() {
-    if (commentLoading.value || commentFinished.value) return
-    commentLoading.value = true
-
-    try {
-        const response = await axios.get('http://localhost:8888/api/video/comment/page', {
-            params: {
-                videoId: videoInfo.value.id,
-                page: commentPage.value,
-                pageSize: commentPageSize.value
-            }
-        })
-
-        const data = response.data.data || []
-
-        if (data.length < commentPageSize.value) {
-            commentFinished.value = true
-        }
-
-        comments.value.push(...data)
-        commentPage.value += 1
 
 
-    } catch (error) {
-        console.log('加载评论失败:', error)
-    } finally {
-        commentLoading.value = false
-
-    }
-
-}
-
-
-function handleCommentScroll() {
-    const el = commentListRef.value
-    if (!el || commentLoading.value || commentFinished.value) return
-
-    const scrollTop = el.scrollTop         // 已滚动距离
-    const clientHeight = el.clientHeight   // 可视高度
-    const scrollHeight = el.scrollHeight   // 内容总高度
-
-    // 如果滚动到底部 100px 以内
-    if (scrollTop + clientHeight >= scrollHeight - 100) {
-        fetchComments()
-    }
-}
-
-
-
-
-// 提交评论
-const submitComment = async () => {
-    if (!commentContent.value.trim()) return
-
-    try {
-        const response = await axios.post('http://localhost:8888/api/video/comment/submit', {
-            videoId: videoInfo.value.id,
-            content: commentContent.value
-        })
-
-
-        //在评论成功提交后，立即将新评论插入到前端页面的评论列表最前面，实现“即时显示”的用户体验。
-        comments.value.unshift({
-            id: response.data.id,
-            userId: userStore.userId,
-            userName: userStore.userName,
-            userAvatar: userStore.userAvatar || defaultAvatar.value,
-            content: commentContent.value,
-            time: new Date().toISOString(),
-            likeCount: 0
-        })
-
-        commentContent.value = ''
-        videoInfo.value.commentCount++
-    } catch (error) {
-        console.error('提交评论失败:', error)
-    }
-}
-
+const activeTag = ref(0);
 
 
 // 推荐视频
@@ -360,9 +215,12 @@ async function fetchVideoDetail() {
             publishTime: data.publishTime || '',
             description: data.description || '',
             upId: data.upId || 0,
+            tags: data.tags || []
         };
-        isLike.value=data.liked
-        isCollect.value=data.collect
+
+        console.log("=====" + videoInfo.value.tags)
+        isLike.value = data.liked
+        isCollect.value = data.collect
 
     } catch (error) {
         console.log(error);
@@ -424,17 +282,17 @@ async function handleLike() {
     }
 
 
-    const response=await axios.post('http://localhost:8888/api/video/islike',null,{
-        params:{
-            videoId:videoInfo.value.id,
-            userId:userStore.userId,
-            isLike:isLike.value
+    const response = await axios.post('http://localhost:8888/api/video/islike', null, {
+        params: {
+            videoId: videoInfo.value.id,
+            userId: userStore.userId,
+            isLike: isLike.value
         }
     })
 
-    isLike.value=!isLike.value
+    isLike.value = !isLike.value
 
-    videoInfo.value.likeCount=response.data.data
+    videoInfo.value.likeCount = response.data.data
 
 
 }
@@ -442,7 +300,7 @@ async function handleLike() {
 
 
 // 收藏
-async function handleCollect () {
+async function handleCollect() {
 
     if (userStore.isLoggedIn === false) {
         // 用户还未登录，提示用户登录
@@ -451,18 +309,18 @@ async function handleCollect () {
 
     }
 
-    const response=await axios.post('http://localhost:8888/api/user/collect',null,{
-        params:{
-            videoId:videoInfo.value.id,
-            userId:userStore.userId,
-            isCollect:isCollect.value
+    const response = await axios.post('http://localhost:8888/api/user/collect', null, {
+        params: {
+            videoId: videoInfo.value.id,
+            userId: userStore.userId,
+            isCollect: isCollect.value
         }
     })
 
 
-    isCollect.value=!isCollect.value
+    isCollect.value = !isCollect.value
 
-    videoInfo.value.collectCount=response.data.data
+    videoInfo.value.collectCount = response.data.data
 
 
 }
@@ -534,11 +392,7 @@ onMounted(async () => {
     userStore.restore()
     await fetchVideoDetail()
     await getUpInfo()
-    await fetchComments()
     initPlayer()
-
-    commentListRef.value?.addEventListener('scroll', handleCommentScroll)
-
 })
 
 
@@ -547,11 +401,24 @@ onMounted(async () => {
 
 <style scoped>
 .video-detail-container {
-    max-width: 1200px;
-    margin: 0 auto;
+    display: flex;
+    margin-top: 50px;
     padding: 20px;
     background-color: #fff;
 }
+
+
+.video-detail-left {
+    flex: 3;
+
+}
+
+.video-detail-right {
+    flex: 1;
+    margin-left: 20px;
+
+}
+
 
 .video-player-section {
     margin-bottom: 20px;
@@ -580,13 +447,6 @@ onMounted(async () => {
     /* 或者使用 `contain` 保持完整比例，但可能有黑边 */
 }
 
-.video-info-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 15px;
-}
-
 .video-title {
     font-size: 22px;
     font-weight: 500;
@@ -597,9 +457,9 @@ onMounted(async () => {
 
 .video-actions {
     display: flex;
-    gap: 10px;
     flex: 1;
-    justify-content: space-between;
+    margin-top: 15px;
+    gap: 20px;
 }
 
 .action-btn {
@@ -649,38 +509,55 @@ onMounted(async () => {
     gap: 20px;
 }
 
-.video-main-content {
-    flex: 1;
-}
+
 
 .up-info {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
+
 }
+
+.up-info-left {
+    margin-right: 10px;
+}
+
+.up-info-right {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+
+}
+
+.nameAndSend {
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+}
+
 
 .up-avatar {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    overflow: hidden;
-    margin-right: 12px;
+
+
 }
 
 .up-avatar img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+
 }
 
-.up-detail {
-    flex: 1;
-}
+
 
 .up-name {
     font-size: 16px;
     font-weight: 500;
     margin-bottom: 4px;
+    margin-right: 5px;
 }
 
 .up-fans {
@@ -692,10 +569,12 @@ onMounted(async () => {
     padding: 6px 16px;
     background-color: #fb7299;
     color: white;
+    width: 100%;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
+
 }
 
 .follow-btn:hover {
@@ -722,126 +601,9 @@ onMounted(async () => {
     line-height: 1.6;
 }
 
-.comment-section {
-    margin-top: 30px;
-}
 
-.comment-title {
-    font-size: 18px;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-}
 
-.comment-count {
-    margin-left: 8px;
-    font-size: 14px;
-    color: #999;
-}
 
-.comment-input-area {
-    display: flex;
-    margin-bottom: 20px;
-}
-
-.user-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    overflow: hidden;
-    margin-right: 12px;
-}
-
-.user-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.input-wrapper {
-    flex: 1;
-    position: relative;
-}
-
-.input-wrapper input {
-    width: 100%;
-    padding: 10px 15px;
-    border: 1px solid #e5e5e5;
-    border-radius: 4px;
-    outline: none;
-}
-
-.input-wrapper input:focus {
-    border-color: #00a1d6;
-}
-
-.submit-btn {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: #00a1d6;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 4px 10px;
-    cursor: pointer;
-}
-
-.comment-list {
-    border-top: 1px solid #e5e5e5;
-    padding-top: 15px;
-}
-
-.comment-item {
-    display: flex;
-    margin-bottom: 20px;
-}
-
-.comment-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    overflow: hidden;
-    margin-right: 12px;
-}
-
-.comment-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.comment-content {
-    flex: 1;
-}
-
-.comment-user {
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 5px;
-}
-
-.comment-text {
-    line-height: 1.5;
-    margin-bottom: 5px;
-}
-
-.comment-meta {
-    font-size: 12px;
-    color: #999;
-    display: flex;
-    gap: 15px;
-}
-
-.like-count {
-    display: flex;
-    align-items: center;
-}
-
-.like-count i {
-    margin-right: 3px;
-}
 
 .recommend-section {
     width: 300px;
@@ -922,64 +684,126 @@ onMounted(async () => {
 
 
 .follow-btn {
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  border: 1px solid transparent;
-  cursor: pointer;
-  outline: none;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    cursor: pointer;
+    outline: none;
 }
 
 /* 未关注样式：蓝色按钮 */
 .not-followed-in {
-  background-color: #66b1ff;
-  color: white;
-  border-color: #66b1ff;
+    background-color: #66b1ff;
+    color: white;
+    border-color: #66b1ff;
 }
 
 .not-followed-in:hover {
-  background-color: skyblue;
-  border-color: skyblue;
+    background-color: skyblue;
+    border-color: skyblue;
 }
 
 /* 已关注样式：灰色按钮 */
 .followed-in {
-  background-color: #e0e0e0;
-  color: #606266;
-  border-color: #dcdcdc;
+    background-color: #e0e0e0;
+    color: #606266;
+    border-color: #dcdcdc;
 }
 
 .followed-in:hover {
-  background-color: #cfcfcf;
-  border-color: #cfcfcf;
+    background-color: #cfcfcf;
+    border-color: #cfcfcf;
 }
 
 
 .not-liked-in {
-  background-color: #e0e0e0;
-  color: #606266;
-  border-color: #dcdcdc;
+    background-color: #e0e0e0;
+    color: #606266;
+    border-color: #dcdcdc;
 }
 
 
 .liked-in {
-  background-color: skyblue;
-  border-color: skyblue;
+    background-color: skyblue;
+    border-color: skyblue;
 }
 
 
 .not-collect-in {
-  background-color: #e0e0e0;
-  color: #606266;
-  border-color: #dcdcdc;
+    background-color: #e0e0e0;
+    color: #606266;
+    border-color: #dcdcdc;
 }
 
 
 .collect-in {
-  background-color: skyblue;
-  border-color: skyblue;
+    background-color: skyblue;
+    border-color: skyblue;
 }
 
+
+.video-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+    border-radius: 15px;
+}
+
+.video-tag {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #f0f0f0;
+    border-radius: 15px;
+    color: #666;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.video-tag:hover {
+    background-color: #e0e0e0;
+}
+
+.video-tag.active {
+    background-color: #409eff;
+    color: white;
+}
+
+
+
+.video-tags-container {
+    /* padding: 12px 16px; */
+    margin-bottom: 16px;
+    border-top: 1px solid gainsboro;
+}
+
+.video-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.video-tag {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #f0f0f0;
+    border-radius: 15px;
+    color: #666;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.video-tag:hover {
+    background-color: #e0e0e0;
+}
+
+.video-tag.active {
+    background-color: #409eff;
+    color: white;
+}
 </style>
