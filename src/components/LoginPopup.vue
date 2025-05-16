@@ -100,7 +100,6 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
-import 'element-plus/dist/index.css'
 import { useRouter } from 'vue-router'
 
 
@@ -268,6 +267,10 @@ function smsLogin() {
 </script>
 
 <style scoped>
+* {
+    box-sizing: border-box;
+}
+
 .login-container {
     width: 800px;
     border: 1px solid black;

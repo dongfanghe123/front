@@ -1,35 +1,35 @@
 <template>
-    <div class="video-card">
+  <div class="video-card">
 
-      
-      <div class="video-cover">
-        <img :src="cover" :alt="title" class="cover-image" />
-        <div class="video-overlay">
-          <div class="left-info">
-            <span class="icon play-icon" />{{ views }}
-            <span class="icon comment-icon" />{{ likes }}
-          </div>
-          <div class="video-duration">{{ duration }}</div>
+
+    <div class="video-cover">
+      <img :src="cover" :alt="title" class="cover-image" />
+      <div class="video-overlay">
+        <div class="left-info">
+          <span class="icon play-icon" />{{ views }}
+          <span class="icon comment-icon" />{{ likes }}
         </div>
-      </div>
-
-
-      <div class="video-info">
-        <h3 class="video-title">{{ title }}</h3>
-        <div class="video-meta">
-          <div class="video-author">
-            <span class="up-tag">UP</span> {{ author }}
-          </div>
-          <div class="video-time">{{ uploadTime }}</div>
-        </div>
+        <div class="video-duration">{{ duration }}</div>
       </div>
     </div>
-  </template>
+
+
+    <div class="video-info">
+      <h3 class="video-title">{{ title }}</h3>
+      <div class="video-meta">
+        <div class="video-author">
+          <span class="up-tag">UP</span> {{ author }}
+        </div>
+        <div class="video-time">{{ uploadTime }}</div>
+      </div>
+    </div>
+  </div>
+</template>
 
 <script setup lang="ts">
 
 
-const props =defineProps<{
+const props = defineProps<{
   title: string
   author: string
   views: string
@@ -42,9 +42,13 @@ const props =defineProps<{
 
 </script>
 
-  
 
-  <style>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
 
 .video-card {
   background-color: white;
@@ -65,13 +69,15 @@ const props =defineProps<{
 
 .video-cover {
   position: relative;
-  padding-top: 75%; /* 比如改为 10:16 的比例，图更大些 */
+  padding-top: 75%;
+  /* 比如改为 10:16 的比例，图更大些 */
   overflow: hidden;
 }
 
 .cover-image {
   position: absolute;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -106,11 +112,13 @@ const props =defineProps<{
 .stat-item {
   display: flex;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.6); /* 黑底半透明 */
+  background-color: rgba(0, 0, 0, 0.6);
+  /* 黑底半透明 */
   padding: 2px 6px;
   border-radius: 3px;
   font-size: 12px;
-  color: #fff; /* 数字白色 */
+  color: #fff;
+  /* 数字白色 */
 }
 
 .icon {
@@ -193,7 +201,8 @@ const props =defineProps<{
   font-weight: 600;
 
   /* 文字颜色 */
-  color: #222; /* 或者你想要的任何色值 */
+  color: #222;
+  /* 或者你想要的任何色值 */
 
   /* 行高，保证两行文本的垂直居中 */
   line-height: 1.3;
