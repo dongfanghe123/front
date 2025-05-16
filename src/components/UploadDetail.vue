@@ -67,15 +67,6 @@
           </div>
         </div>
 
-        <!-- <div class="form-group">
-          <label>参与话题：</label>
-          <div class="topics-list">
-            <span class="topic" v-for="topic in topics" :key="topic">
-              {{ topic }}
-            </span>
-            <span class="search-more">搜索更多话题></span>
-          </div>
-        </div> -->
 
         <div class="form-group">
   <label>简介</label>
@@ -217,6 +208,11 @@ async function submit() {
 
 
 <style scoped>
+
+* {
+    box-sizing: border-box;
+}
+
 .video-upload-container {
   max-width: 1200px;
   margin: 0 auto;

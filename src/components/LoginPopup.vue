@@ -267,6 +267,10 @@ function smsLogin() {
 </script>
 
 <style scoped>
+* {
+    box-sizing: border-box;
+}
+
 .login-container {
     width: 800px;
     border: 1px solid black;

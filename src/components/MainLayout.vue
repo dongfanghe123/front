@@ -63,26 +63,6 @@
       </div>
     </header>
   </div>
-
-  
-  <!-- 二级导航 -->
-  <!-- <div class="sub-nav">
-    <div class="sub-nav-container">
-      <a href="#" class="sub-nav-item">动态</a>
-      <a href="#" class="sub-nav-item active">热门</a>
-      <a href="#" class="sub-nav-item">电影</a>
-      <a href="#" class="sub-nav-item">电视剧</a>
-      <a href="#" class="sub-nav-item">纪录片</a>
-      <a href="#" class="sub-nav-item">游戏</a>
-      <a href="#" class="sub-nav-item">音乐</a>
-      <a href="#" class="sub-nav-item">影视</a>
-      <a href="#" class="sub-nav-item">知识</a>
-      <a href="#" class="sub-nav-item">资讯</a>
-      <a href="#" class="sub-nav-item">更多</a>
-    </div>
-  </div> -->
-
-
 </template>
 
 <script lang="ts" setup>

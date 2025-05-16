@@ -48,7 +48,6 @@
         </div>
     </div>
 
-
 </template>
 
 
@@ -92,6 +91,23 @@ const commentListRef = ref<HTMLElement | null>(null)
 
 const props = defineProps(['videoId'])
 
+
+// 监听commentFinished变化
+watch(commentFinished, (newVal) => {
+    if (newVal) {
+        // 当没有更多评论时，调整滚动行为
+        adjustScrollBehavior()
+    }
+})
+
+
+function adjustScrollBehavior() {
+    // 设置评论区的最大高度为当前内容高度
+    if (commentListRef.value) {
+        commentListRef.value.style.maxHeight = commentListRef.value.scrollHeight + 'px'
+        commentListRef.value.style.overflowY = 'hidden'
+    }
+}
 
 // 提交评论
 const submitComment = async () => {
@@ -187,7 +203,6 @@ const formatDate = (dateStr: string): string => {
 
 
 onMounted(async ()=>{
-    "XXXXXXXXXXXXXXXXXXXXX"
     userStore.restore()
     await fetchComments()
     commentListRef.value?.addEventListener('scroll', handleCommentScroll)
@@ -197,11 +212,24 @@ onMounted(async ()=>{
 
 
 <style scoped>
+
+* {
+    box-sizing: border-box;
+}
+
+
+.comment-section {
+    margin-top: 30px;
+    max-height: 800px;
+
+}
+
 .comment-header {
     display: flex;
     line-height: 60px;
     /* 设置行高，需根据内容高度调整 */
-    border-top: 1px solid gainsboro;
+
+
 }
 
 .comment-header span {
@@ -232,10 +260,6 @@ onMounted(async ()=>{
     color: black;
     font-weight: bold;
     /* 可选：选中时加粗 */
-}
-
-.comment-section {
-    margin-top: 30px;
 }
 
 .comment-title {
@@ -300,9 +324,13 @@ onMounted(async ()=>{
 }
 
 .comment-list {
-    border-top: 1px solid #e5e5e5;
+    margin-top: 25px;
     padding-top: 15px;
+    height: 200px;
+    overflow-y: auto;
+
 }
+
 
 .comment-item {
     display: flex;
@@ -353,5 +381,11 @@ onMounted(async ()=>{
 
 .like-count i {
     margin-right: 3px;
+}
+
+
+.no-more-comments{
+      text-align: center;
+      color: gray;
 }
 </style>

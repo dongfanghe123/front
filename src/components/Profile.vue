@@ -241,7 +241,9 @@ onMounted(async () => {
 
 
 <style scoped>
-
+* {
+    box-sizing: border-box;
+}
 
 .header-background {
   width: auto;

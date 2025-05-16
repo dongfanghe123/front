@@ -16,7 +16,8 @@
                     <span>播放量: {{ formatNumber(videoInfo.viewCount) }}</span>
                     <span>评论数：{{ formatNumber(videoInfo.commentCount) }}</span>
                 </div>
-            </div>
+            </div> 
+
 
 
             <!--视频播放区域-->
@@ -80,7 +81,7 @@
 
                     <div class="nameAndSend">
                         <div class="up-name">{{ upInfo.name }}</div>
-                        <el-button type="link">
+                        <el-button type="link" class="custom-message-btn">
                             <el-icon>
                                 <Message />
                             </el-icon>
@@ -97,17 +98,23 @@
                 </div>
             </div>
 
-
             <!--推荐视频列表-->
-            
+            <!-- <VideoDetailPageRecommendCard v-for="video in recommendVideos"
+            :key="video.id"
+            :title="video.title"
+            :author="video.author"
+            :views="video.views"
+            :comments="video.comments"
+            :cover="video.cover"
+            :id="video.id"
+            ></VideoDetailPageRecommendCard> -->
+
         </div>
-
-
     </div>
 </template>
 
-<script lang="ts" setup>
 
+<script lang="ts" setup>
 
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -117,7 +124,7 @@ import axios from '@/utils/axiosInstance'
 import MainLayout from './MainLayout.vue'
 import Comment from './Comment.vue'
 import { ElMessage } from 'element-plus'
-
+import VideoDetailPageRecommendCard from './VideoDetailPageRecommendCard.vue'
 
 
 const route = useRoute()
@@ -168,12 +175,22 @@ const upInfo = ref({
 
 
 
+interface VideoItem {
+  id: number;
+  title: string;
+  author: string;
+  views: number;
+  comments: number;
+  duration: string;
+  cover: string;
+  uploadTime: string;
+}
 
 const activeTag = ref(0);
 
 
 // 推荐视频
-const recommendVideos = ref<any[]>([])
+const recommendVideos = ref<VideoItem[]>([])
 
 
 // 初始化播放器
@@ -218,7 +235,6 @@ async function fetchVideoDetail() {
             tags: data.tags || []
         };
 
-        console.log("=====" + videoInfo.value.tags)
         isLike.value = data.liked
         isCollect.value = data.collect
 
@@ -254,20 +270,21 @@ async function getUpInfo() {
 
 
 
-
 // 获取推荐视频
 const fetchRecommendVideos = async () => {
     try {
-        const response = await axios.get('/api/video/recommend', {
+        const response = await axios.get('http://localhost:8888/api/video/recommendList', {
             params: {
-                videoId: route.params.id,
-                limit: 5
+                page:0,
+                pageSize:20
             }
         })
-        recommendVideos.value = response.data
+        recommendVideos.value.push(...response.data.data)
+
     } catch (error) {
         console.error('获取推荐视频失败:', error)
     }
+
 }
 
 
@@ -393,6 +410,7 @@ onMounted(async () => {
     await fetchVideoDetail()
     await getUpInfo()
     initPlayer()
+    await fetchRecommendVideos()
 })
 
 
@@ -400,23 +418,31 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+
+
+* {
+    box-sizing: border-box;
+}
+
 .video-detail-container {
     display: flex;
     margin-top: 50px;
     padding: 20px;
     background-color: #fff;
+
 }
 
 
 .video-detail-left {
-    flex: 3;
-
+    display: flex;
+    flex-direction: column;
+    width: 75%;
+    
 }
 
 .video-detail-right {
-    flex: 1;
-    margin-left: 20px;
-
+    width: 25%;
+    padding-left: 10px;
 }
 
 
@@ -510,7 +536,6 @@ onMounted(async () => {
 }
 
 
-
 .up-info {
     display: flex;
     align-items: center;
@@ -550,7 +575,6 @@ onMounted(async () => {
     height: 100%;
 
 }
-
 
 
 .up-name {
@@ -602,47 +626,6 @@ onMounted(async () => {
 }
 
 
-
-
-
-.recommend-section {
-    width: 300px;
-}
-
-.recommend-title {
-    font-size: 16px;
-    margin-bottom: 15px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #e5e5e5;
-}
-
-.recommend-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.recommend-item {
-    display: flex;
-    gap: 10px;
-    cursor: pointer;
-}
-
-.recommend-cover {
-    position: relative;
-    width: 120px;
-    height: 75px;
-    border-radius: 4px;
-    overflow: hidden;
-    flex-shrink: 0;
-}
-
-.recommend-cover img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
 .video-duration {
     position: absolute;
     right: 5px;
@@ -654,33 +637,6 @@ onMounted(async () => {
     border-radius: 2px;
 }
 
-.recommend-info {
-    flex: 1;
-}
-
-.recommend-title {
-    font-size: 14px;
-    margin-bottom: 5px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.4;
-}
-
-.recommend-up {
-    font-size: 12px;
-    color: #999;
-    margin-bottom: 5px;
-}
-
-.recommend-stats {
-    font-size: 12px;
-    color: #999;
-    display: flex;
-    gap: 10px;
-}
 
 
 .follow-btn {
@@ -805,5 +761,53 @@ onMounted(async () => {
 .video-tag.active {
     background-color: #409eff;
     color: white;
+}
+
+.custom-message-btn {
+    border: none !important;
+    background: transparent !important;
+    color: #409EFF !important;
+    padding: 8px 12px;
+    transition: all 0.3s;
+}
+
+.custom-message-btn:hover {
+    background: rgba(64, 158, 255, 0.1) !important;
+    transform: translateY(-1px);
+}
+
+
+.recommend-container {
+  width: 300px;
+  padding: 16px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.recommend-title {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.recommend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 为视频卡片添加悬停效果 */
+.video-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.video-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 </style>
